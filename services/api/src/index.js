@@ -11,7 +11,8 @@ const serviceVersion = process.env.SERVICE_VERSION || '1.0.0';
 
 let redisClient = null;
 let redisConnected = false;
-let faultModeActive = process.env.FAULT_MODE === 'true';
+const faultEnabled = process.env.ENABLE_FAULT_INJECTION === 'true';
+let faultModeActive = faultEnabled && process.env.FAULT_MODE === 'true';
 
 // Initialize Redis if configured
 if (redisHost) {
@@ -94,8 +95,8 @@ app.get('/metrics', async (req, res) => {
 
 // 4. Products API Endpoint
 app.get('/api/products', async (req, res) => {
-  // Fault simulation check (used for Phase 6 Canary rollback tests)
-  if (faultModeActive || req.query.fault === 'true') {
+  // Fault simulation check (gated by ENABLE_FAULT_INJECTION for dev/staging environments)
+  if (faultEnabled && (faultModeActive || req.query.fault === 'true')) {
     logger.warn('Fault mode triggered on /api/products');
     return res.status(500).json({
       error: 'InternalServerError',
@@ -126,9 +127,15 @@ app.get('/api/products', async (req, res) => {
   res.json({ source: 'database', version: serviceVersion, products });
 });
 
-// 5. Fault Toggle Endpoint (allows switching fault mode dynamically)
+// 5. Fault Toggle Endpoint (gated behind ENABLE_FAULT_INJECTION)
 app.post('/api/fault', (req, res) => {
-  const { enabled } = req.body;
+  if (!faultEnabled) {
+    return res.status(404).json({
+      error: 'NotFound',
+      message: 'Fault injection is disabled in this environment'
+    });
+  }
+  const { enabled } = req.body || {};
   faultModeActive = Boolean(enabled);
   logger.warn('Fault mode toggled', { active: faultModeActive });
   res.json({ faultModeActive });

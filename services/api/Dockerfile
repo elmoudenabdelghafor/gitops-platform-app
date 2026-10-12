@@ -1,5 +1,5 @@
 # Stage 1: Builder
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 
 WORKDIR /app
 COPY package*.json ./
@@ -8,7 +8,7 @@ RUN npm ci --omit=dev
 COPY . .
 
 # Stage 2: Hardened Runtime
-FROM node:20-alpine
+FROM node:22-alpine
 
 # Enforce non-root execution with numeric UID/GID for Kyverno compliance
 RUN addgroup -g 10001 -S app && adduser -u 10001 -S app -G app

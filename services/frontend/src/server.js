@@ -15,7 +15,7 @@ client.collectDefaultMetrics({ register });
 const httpRequestsTotal = new client.Counter({
   name: 'frontend_http_requests_total',
   help: 'Total frontend HTTP requests',
-  labelNames: ['method', 'path', 'status'],
+  labelNames: ['method', 'route', 'status'],
   registers: [register]
 });
 
@@ -34,10 +34,11 @@ function log(level, message, meta = {}) {
 app.use((req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
+    const route = req.route ? (req.baseUrl || '') + req.route.path : 'unmatched';
     httpRequestsTotal.inc({
       method: req.method,
-      path: req.route ? req.route.path : req.path,
-      status: res.statusCode.toString()
+      route: route,
+      status: String(res.statusCode)
     });
     log('info', 'HTTP Request', {
       method: req.method,

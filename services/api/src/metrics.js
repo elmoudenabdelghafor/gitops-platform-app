@@ -1,52 +1,41 @@
 const client = require('prom-client');
 
-// Initialize default metric collection (CPU, Memory, event loop)
+// Initialize Prometheus registry and default metric collection
 const register = new client.Registry();
 client.collectDefaultMetrics({ register });
 
-// Define custom HTTP request counter
+// Define HTTP request counter with normalized 'route' label to prevent cardinality bloat
 const httpRequestsTotal = new client.Counter({
   name: 'http_requests_total',
   help: 'Total count of HTTP requests processed',
-  labelNames: ['method', 'path', 'status'],
+  labelNames: ['method', 'route', 'status'],
   registers: [register]
 });
 
-// Define custom HTTP request duration histogram
+// Define HTTP request duration histogram
 const httpRequestDurationSeconds = new client.Histogram({
   name: 'http_request_duration_seconds',
-  help: 'Duration of HTTP requests in seconds',
-  labelNames: ['method', 'path', 'status'],
-  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],
+  help: 'HTTP request latency in seconds',
+  labelNames: ['method', 'route', 'status'],
+  buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5],
   registers: [register]
 });
 
-// Express middleware to track metrics
+// Express middleware tracking route-level metrics
 function metricsMiddleware(req, res, next) {
-  const start = process.hrtime();
+  const endTimer = httpRequestDurationSeconds.startTimer();
 
   res.on('finish', () => {
-    // Normalise route path to avoid cardinality explosion
-    const routePath = req.route ? req.baseUrl + req.route.path : req.path;
-    const duration = process.hrtime(start);
-    const durationInSeconds = duration[0] + duration[1] / 1e9;
-    const status = res.statusCode ? res.statusCode.toString() : 'unknown';
-
-    // Record metrics
-    httpRequestsTotal.inc({
+    // Normalize route to template pattern to prevent high cardinality
+    const route = req.route ? (req.baseUrl || '') + req.route.path : 'unmatched';
+    const labels = {
       method: req.method,
-      path: routePath,
-      status: status
-    });
+      route: route,
+      status: String(res.statusCode)
+    };
 
-    httpRequestDurationSeconds.observe(
-      {
-        method: req.method,
-        path: routePath,
-        status: status
-      },
-      durationInSeconds
-    );
+    httpRequestsTotal.inc(labels);
+    endTimer(labels);
   });
 
   next();
