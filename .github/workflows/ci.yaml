@@ -89,3 +89,31 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           docker push ${{ steps.meta.outputs.image_ref }}
+
+  update-config:
+    name: Promote Image Tag to Config Repo
+    needs: build-and-scan
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout platform-config repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/platform-config
+          token: ${{ secrets.CONFIG_REPO_TOKEN }}
+
+      - name: Set up Kustomize
+        uses: imranismail/setup-kustomize@v3
+
+      - name: Update dev overlay image tag
+        run: |
+          cd apps/shop/overlays/dev
+          kustomize edit set image shop-api=${{ env.REGISTRY }}/${{ github.repository_owner }}/shop-api:${{ github.sha }}
+          kustomize edit set image shop-frontend=${{ env.REGISTRY }}/${{ github.repository_owner }}/shop-frontend:${{ github.sha }}
+
+      - name: Commit and push configuration change
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore(dev): promote shop microservices to ${{ github.sha }}" || echo "No changes to commit"
+          git push
