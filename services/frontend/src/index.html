@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitOps Cloud Shop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: rgba(22, 30, 49, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --accent: #06b6d4;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: radial-gradient(circle at top right, #1e1b4b 0%, var(--bg) 60%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1.5rem;
+    }
+
+    header {
+      max-width: 1200px;
+      margin: 0 auto 2.5rem;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 1.5rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.25rem;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+
+    h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
+    .subtitle { font-size: 0.85rem; color: var(--text-muted); }
+
+    .badges {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+    }
+
+    .badge.green { color: var(--success); border-color: rgba(16, 185, 129, 0.25); background: rgba(16, 185, 129, 0.1); }
+    .badge.purple { color: #a855f7; border-color: rgba(168, 85, 247, 0.25); background: rgba(168, 85, 247, 0.1); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .product-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+
+    .product-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.5rem; }
+    .product-price { font-size: 1.25rem; font-weight: 800; color: var(--accent); margin-bottom: 1rem; }
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      width: 100%;
+    }
+    .btn:hover { background: var(--primary-hover); }
+    .btn.danger { background: var(--danger); margin-top: 0.5rem; }
+
+    .info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      font-size: 0.85rem;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 0.6rem;
+    }
+
+    .info-label { color: var(--text-muted); }
+    .info-value { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+
+    #fault-status {
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      margin-top: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo-icon">⎈</div>
+      <div>
+        <h1>GitOps Cloud Shop</h1>
+        <div class="subtitle">Cloud-Native Microservices Demo Platform</div>
+      </div>
+    </div>
+    <div class="badges">
+      <div class="badge green"><span class="dot"></span> <span id="env-tag">Dev</span></div>
+      <div class="badge purple"><span>v</span><span id="version-tag">1.0.0</span></div>
+      <div class="badge" id="backend-status">Checking API...</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div class="panel-title">
+        <span>Product Catalog</span>
+        <span class="subtitle" id="catalog-source">Source: fetching...</span>
+      </div>
+      <div class="products-grid" id="products-container">
+        <div class="subtitle">Loading items from API backend...</div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-title">Platform Runtime</div>
+      <div class="info-list">
+        <div class="info-row">
+          <span class="info-label">API Gateway:</span>
+          <span class="info-value" id="api-url-display">/api</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Latency:</span>
+          <span class="info-value" id="latency-display">- ms</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Ingress Controller:</span>
+          <span class="info-value">Traefik</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">CNI:</span>
+          <span class="info-value">Calico</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 2rem;">
+        <div class="panel-title" style="font-size: 0.95rem;">Canary Fault Injection</div>
+        <p class="subtitle" style="margin-bottom: 1rem;">
+          Test automated Canary rollback by simulating 5xx errors from the API.
+        </p>
+        <button class="btn danger" id="fault-toggle-btn" onclick="toggleFault()">Inject 500 Errors</button>
+        <div id="fault-status"></div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    let faultActive = false;
+
+    async function loadProducts() {
+      const start = performance.now();
+      const statusEl = document.getElementById('backend-status');
+      const container = document.getElementById('products-container');
+      const latencyEl = document.getElementById('latency-display');
+      const sourceEl = document.getElementById('catalog-source');
+
+      try {
+        const res = await fetch('/api/products');
+        const latency = Math.round(performance.now() - start);
+        latencyEl.textContent = `${latency} ms`;
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        statusEl.textContent = 'API Connected';
+        statusEl.className = 'badge green';
+        sourceEl.textContent = `Source: ${data.source || 'api'} (v${data.version || '1.0.0'})`;
+        document.getElementById('version-tag').textContent = data.version || '1.0.0';
+
+        container.innerHTML = data.products.map(p => `
+          <div class="product-card">
+            <div>
+              <div class="product-name">${p.name}</div>
+              <div class="product-price">$${p.price.toFixed(2)}</div>
+            </div>
+            <button class="btn" onclick="alert('Order placed for: ${p.name}')">Add to Cart</button>
+          </div>
+        `).join('');
+      } catch (err) {
+        statusEl.textContent = `API Error: ${err.message}`;
+        statusEl.className = 'badge';
+        statusEl.style.color = 'var(--danger)';
+        container.innerHTML = `<div style="color: var(--danger); padding: 1rem;">Failed to reach backend API (${err.message})</div>`;
+      }
+    }
+
+    async function toggleFault() {
+      faultActive = !faultActive;
+      const btn = document.getElementById('fault-toggle-btn');
+      const status = document.getElementById('fault-status');
+
+      try {
+        await fetch('/api/fault', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled: faultActive })
+        });
+
+        if (faultActive) {
+          btn.textContent = 'Disable Fault Injection';
+          btn.style.background = 'var(--warning)';
+          status.style.display = 'block';
+          status.style.background = 'rgba(239, 68, 68, 0.2)';
+          status.style.color = 'var(--danger)';
+          status.textContent = 'Fault mode active: API is returning 500s!';
+        } else {
+          btn.textContent = 'Inject 500 Errors';
+          btn.style.background = 'var(--danger)';
+          status.style.display = 'none';
+        }
+        loadProducts();
+      } catch (e) {
+        alert('Failed to toggle fault mode: ' + e.message);
+      }
+    }
+
+    loadProducts();
+    setInterval(loadProducts, 5000);
+  </script>
+</body>
+</html>
