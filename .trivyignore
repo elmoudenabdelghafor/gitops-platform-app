@@ -1,0 +1,6 @@
+# .trivyignore - Vulnerability exception policy
+# Format: CVE-ID exp:YYYY-MM-DD # Reason
+# Every ignored vulnerability must have an expiration date and an documented rationale.
+
+# Example entry:
+# CVE-2026-99999 exp:2026-12-31 # Accepted risk: non-exploitable in containerized runtime
