@@ -63,7 +63,8 @@ jobs:
       - name: Define Image Reference
         id: meta
         run: |
-          IMAGE_NAME="${{ env.REGISTRY }}/${{ github.repository_owner }}/shop-${{ matrix.service }}"
+          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME="${{ env.REGISTRY }}/${OWNER_LC}/shop-${{ matrix.service }}"
           IMAGE_TAG="${{ github.sha }}"
           echo "image_ref=${IMAGE_NAME}:${IMAGE_TAG}" >> $GITHUB_OUTPUT
 
@@ -99,7 +100,7 @@ jobs:
       - name: Checkout platform-config repository
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/platform-config
+          repository: ${{ github.repository_owner }}/gitops-platform-config
           token: ${{ secrets.CONFIG_REPO_TOKEN }}
 
       - name: Set up Kustomize
