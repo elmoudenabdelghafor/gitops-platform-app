@@ -10,6 +10,9 @@ COPY . .
 # Stage 2: Hardened Runtime
 FROM node:22-alpine
 
+# Strip build tools and package managers from runtime image to minimize attack surface and eliminate CVEs
+RUN rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /opt/yarn*
+
 # Enforce non-root execution with numeric UID/GID for Kyverno compliance
 RUN addgroup -g 10001 -S app && adduser -u 10001 -S app -G app
 

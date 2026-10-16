@@ -110,8 +110,9 @@ jobs:
       - name: Update dev overlay image tag
         run: |
           cd apps/shop/overlays/dev
-          kustomize edit set image shop-api=${{ env.REGISTRY }}/${{ github.repository_owner }}/shop-api:${{ github.sha }}
-          kustomize edit set image shop-frontend=${{ env.REGISTRY }}/${{ github.repository_owner }}/shop-frontend:${{ github.sha }}
+          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          kustomize edit set image shop-api=${{ env.REGISTRY }}/${OWNER_LC}/shop-api:${{ github.sha }}
+          kustomize edit set image shop-frontend=${{ env.REGISTRY }}/${OWNER_LC}/shop-frontend:${{ github.sha }}
 
       - name: Commit and push configuration change
         run: |
