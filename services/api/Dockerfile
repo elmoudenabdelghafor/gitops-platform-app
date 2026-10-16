@@ -1,5 +1,5 @@
 # Stage 1: Builder
-FROM node:22-alpine AS build
+FROM node:25-alpine AS build
 
 WORKDIR /app
 COPY package*.json ./
@@ -8,7 +8,7 @@ RUN npm ci --omit=dev
 COPY . .
 
 # Stage 2: Hardened Runtime
-FROM node:22-alpine
+FROM node:25-alpine
 
 # Strip build tools and package managers from runtime image to minimize attack surface and eliminate CVEs
 RUN rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /opt/yarn*
