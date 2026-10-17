@@ -8,6 +8,10 @@ on:
 env:
   REGISTRY: ghcr.io
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   nightly-trivy-scan:
     name: Nightly Image Vulnerability Scan
@@ -20,14 +24,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Define Image Reference
+        id: meta
+        run: |
+          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "image_ref=${{ env.REGISTRY }}/${OWNER_LC}/shop-${{ matrix.service }}:${{ github.sha }}" >> $GITHUB_OUTPUT
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run Trivy Vulnerability Scan
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: 'image'
-          image-ref: ${{ env.REGISTRY }}/${{ github.repository_owner }}/shop-${{ matrix.service }}:latest
+          image-ref: ${{ steps.meta.outputs.image_ref }}
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'HIGH,CRITICAL'
           trivyignores: .trivyignore
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}

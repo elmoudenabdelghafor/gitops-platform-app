@@ -67,13 +67,16 @@ jobs:
           IMAGE_NAME="${{ env.REGISTRY }}/${OWNER_LC}/shop-${{ matrix.service }}"
           IMAGE_TAG="${{ github.sha }}"
           echo "image_ref=${IMAGE_NAME}:${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "image_latest=${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
 
       - name: Build container image (load locally for scanning)
         uses: docker/build-push-action@v6
         with:
           context: services/${{ matrix.service }}
           load: true
-          tags: ${{ steps.meta.outputs.image_ref }}
+          tags: |
+            ${{ steps.meta.outputs.image_ref }}
+            ${{ steps.meta.outputs.image_latest }}
 
       - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@v0.36.0
@@ -91,6 +94,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           docker push ${{ steps.meta.outputs.image_ref }}
+          docker push ${{ steps.meta.outputs.image_latest }}
 
   update-config:
     name: Promote Image Tag to Config Repo
